@@ -171,10 +171,63 @@ means_tab <- Complete_Knowledge_high_n |>
   mutate(Country_Residence = fct_reorder(Country_Residence, Knowledge_Corr_Percent,
                                          .fun = mean, na.rm = TRUE)) |> 
   tabyl(Country_Residence, Role) |> 
-  adorn_totals(where = c("col", "row"))     
+  adorn_totals(where = c("col", "row"))
 
-means_gt <- gt(means_tab)   #use describe() to generate other stats like se to append to final gt table. 
+means_gt <- means_tab |> 
+  gt() |> 
+  tab_header(
+    title = md("**Table 1**"),
+    subtitle = md("*Sample size by country and role*")
+  ) |> 
+  cols_label(
+    Country_Residence = "Country",
+    parent  = "Parents",
+    teacher = "Teachers",
+    Total   = "Total"
+  ) |> 
+  tab_spanner(label = "Participants", columns = c(parent, teacher, Total)) |> 
+  fmt_number(columns = c(parent, teacher, Total), decimals = 0, use_seps = TRUE) |> 
+  sub_zero(columns = c(parent, teacher), zero_text = "–") |> 
+  cols_align(align = "left",   columns = Country_Residence) |> 
+  cols_align(align = "center", columns = c(parent, teacher, Total)) |> 
+  # Bold column labels
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  ) |> 
+  # Bold, shaded totals row
+  tab_style(
+    style = list(cell_text(weight = "bold"), cell_fill(color = "grey92")),
+    locations = cells_body(rows = Country_Residence == "Total")
+  ) |> 
+  # Bold totals column
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_body(columns = Total)
+  ) |> 
+  tab_source_note(
+    source_note = "Note. Countries are ordered by overall mean ADHD knowledge score (lowest to highest). Dashes indicate no participants in that role."
+  ) |> 
+  opt_table_font(font = google_font("Source Sans Pro")) |> 
+  tab_options(
+    table.border.top.style = "solid",
+    table.border.top.color = "black",
+    table.border.bottom.color = "black",
+    column_labels.border.bottom.color = "black",
+    heading.align = "left",
+    data_row.padding = px(4)
+  ) 
 
+#Original sample size
+n_TT_Can <- Complete_Knowledge_high_n |> 
+  filter(Country_Residence %in% c("Trinidad & Tobago", "Canada") & Data_source == "Ronald") |> 
+  nrow()
+
+#Number of countries
+n_countries <- n_distinct(Complete_ADHD_Knowledge$Country_Residence, na.rm = TRUE)
+
+#Total number of participants
+n_participants <- nrow(Complete_ADHD_Knowledge)
 ```
 
 ```{r, general audience visuals}
@@ -311,7 +364,7 @@ The current study addresses this limitation by comparing ADHD-specific knowledge
 
 # Version A: Scientific Article
 Trinidad & Tobago is located in the Latin America and Caribbean region, where ADHD is thought to be disproportionately undiagnosed and undertreated among children. Unrecognized of mischaracterized symptoms may be a contributor to this phenomenon; parents and teachers in Trinidad & Tobago were found to interpret ADHD-related behaviours as indiscipline and low motivation, more so than Canadians. In our previous study, we also found that factual knowledge about ADHD was markedly lower among participants from Trinidad & Tobago, versus participants from Canada. 
-As seen in Figures 1 and 2, ADHD knowledge (measured by percentage of correct responses on the ADHD Knowledge Questionnaire), was significantly lower among parents (M = ; t(df) , p = ) and teachers (M = ; t(df) , p = ). 
+As seen in Figures 1 and 2, ADHD knowledge (measured by percentage of correct responses on the ADHD Knowledge Questionnaire), was significantly lower among parents (*M* = ; *t*(df) , *p* = ) and teachers (*M* = ; *t*(df) , *p* = ). 
 ```{r}
 fig1
 ```
@@ -319,5 +372,20 @@ fig1
 ```{r}
 fig2
 ```
-It is appealing to infer that ADHD in Trinidad & Tobago goes undiagnosed beacuse its symptoms go unrecognized, itself a product of low knowldege. while appealing, these causal inferences are tenuous for multiple reasons, one of which relates to "low knowledge". 
+It is appealing to infer that ADHD in Trinidad & Tobago goes undiagnosed beacuse its symptoms go unrecognized, itself a product of low knowldege. while appealing, these causal inferences are tenuous for multiple reasons, one of which relates to "low knowledge". Our results indicate that Trinidad & Tobago's ADHD knowledge was *lower* than Canada's, but this contrast may be misleading. 
+Especially in terms of ADHD, Canada is thought to be a highly medicalized society, fluent and au courant with biomedical interpretations of atypical behaviours in children. It is therefore unclear whether ADHD knowledge in Trinidad & Tobago is *particularly* low, or only appears as such in contrast to Canada. As such, the present study is geared toward contextualizing ADHD knowledge in Trinidad & Tobago, against the backdrop of a broader cross-section of countries. 
+
+# Methods
+
+## Data
+We analyzed data from our original dataset of parents and teachers from Trinidad & Tobago and Canada, (*n* = `{r} n_TT_Can`), in combination with data collected by researchers at RMIT University, from `{r} n_countries` countries. Our combined dataset originally comprised *n* = `{r} n_participants`. After removing countries with <20 parents or teachers, our reduced dataset comprised participants as delineated in Table 1.
+
+```{r}
+means_gt
+
+```
+
+## Instrument and Analysis
+All participants completed the ADHD Knowledge Questionnaire (AKQ), developed by Kos et al. (2004). The version used in our original study was adopted from Youssef et al. (2015) and comprised 26 items (True/False, "I don't know"). The RMIT version comprised the original 27 items. The only substantive difference between the two versions was item 26 from the original ("Research has shown that prolonged use of stimulant medications leads to increased addiction (i.e., drug, alcohol) in adulthood"). For the present study, we computed the percentage of correct responses on the 26 items common to both prior analyses. Missing items were not imputed.
+All current analyses were conducted in R, version 4.6.0, using the following packages: `tidyverse`, `psych`, `patchwork`, `janitor`, `ggthemes` and `gt`. 
 
