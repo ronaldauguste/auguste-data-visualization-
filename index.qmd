@@ -114,7 +114,8 @@ fig3 <- Complete_Knowledge_high_n |>
   theme(
     plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12),  
-    axis.text.y = element_text(size = 11)
+    axis.text.y = element_text(size = 11),
+    plot.margin = margin(5.5, 5.5, 5.5, 40)
   )
 
 #Figure 4: Teachers, all countries
@@ -228,6 +229,25 @@ n_countries <- n_distinct(Complete_ADHD_Knowledge$Country_Residence, na.rm = TRU
 
 #Total number of participants
 n_participants <- nrow(Complete_ADHD_Knowledge)
+
+n_TT_participants <- Complete_ADHD_Knowledge |> 
+  filter(Country_Residence == "Trinidad & Tobago") |> 
+  nrow()
+
+n_Can_participants <- Complete_ADHD_Knowledge |> 
+  filter(Country_Residence == "Canada") |> 
+  nrow()
+
+#T&T percentages
+M_TT_parent <- Complete_Knowledge_high_n |> 
+  filter(Country_Residence == "Trinidad & Tobago", Role == "parent") |> 
+  summarise(M = round(mean(Knowledge_Corr_Percent, na.rm = TRUE), 2)) |> 
+  pull(M)
+
+M_TT_teacher <- Complete_Knowledge_high_n |> 
+  filter(Country_Residence == "Trinidad & Tobago", Role == "teacher") |> 
+  summarise(M = round(mean(Knowledge_Corr_Percent, na.rm = TRUE), 2)) |> 
+  pull(M)
 ```
 
 ```{r, general audience visuals}
@@ -317,7 +337,8 @@ p_parent <- Complete_Knowledge_high_n |>
   theme(
     plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12),
-    axis.text.y = element_text(size = 11)
+    axis.text.y = element_text(size = 11),
+    plot.margin = margin(5.5, 5.5, 5.5, 40)
   )
 
 #Figure 4: Teachers, all countries
@@ -389,3 +410,26 @@ means_gt
 All participants completed the ADHD Knowledge Questionnaire (AKQ), developed by Kos et al. (2004). The version used in our original study was adopted from Youssef et al. (2015) and comprised 26 items (True/False, "I don't know"). The RMIT version comprised the original 27 items. The only substantive difference between the two versions was item 26 from the original ("Research has shown that prolonged use of stimulant medications leads to increased addiction (i.e., drug, alcohol) in adulthood"). For the present study, we computed the percentage of correct responses on the 26 items common to both prior analyses. Missing items were not imputed.
 All current analyses were conducted in R, version 4.6.0, using the following packages: `tidyverse`, `psych`, `patchwork`, `janitor`, `ggthemes` and `gt`. 
 
+# Results
+```{r}
+fig3
+```
+As seen in Figure 3, mean ADHD knowledge in Trinidad & Tobago was the lowest among all countries sampled, for both parents (*M* = `{r} M_TT_parent`) and teachers (*M* = `{r} M_TT_teacher`). 
+
+#Conclusion
+Initial descriptive statistics suggest that factual knowledge about ADHD in Trinidad & Tobago is low in comparison with a broader cross-section of countries. Further inferential tests will be conducted to determine whether preliminary findings are statistically significant.  
+
+# Accessible/Dynamic Outlet Version
+In Trinidad & Tobago, children with ADHD can often end up without the supports they need, because their parents and teachers don't recognize their symptoms. 
+
+If the adults in their lives don't know about ADHD, they won't be able to recognize children's symptoms. 
+
+Right now, it isn't clear how much parents and teachers in Trinidad & Tobago know about ADHD. 
+That's why we decided to measure it. 
+
+We asked `{r} n_TT_participants` parents and teachers 26 questions about ADHD. Here's how they performed on average:
+```{r}
+p_TT_only
+```
+`{r} M_TT_parent`% accuracy for parents and `{r} M_TT_teacher`% accuracy for teachers seems low. 
+But.....is it ***abnormally*** low, or do other countries look similar?
