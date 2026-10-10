@@ -313,27 +313,50 @@ p_TT_Can <- Complete_Knowledge_high_n |>
 #Creating object to highlight only T&T and Canada in all-country figs
 highlight <- c("Trinidad & Tobago", "Canada")
 
-#Figure 3: Parents, all countries
-p_parent <- Complete_Knowledge_high_n |> 
+parent_df <- Complete_Knowledge_high_n |> 
   filter(Role == "parent") |> 
   mutate(
     Country_Residence = fct_reorder(Country_Residence, Knowledge_Corr_Percent,
                                     .fun = mean, na.rm = TRUE),
     Highlight = if_else(Country_Residence %in% highlight,
                         as.character(Country_Residence), "Other")
-  ) |> 
+  )
+
+teacher_df <- Complete_Knowledge_high_n |> 
+  filter(Role == "teacher") |> 
+  mutate(
+    Country_Residence = fct_reorder(Country_Residence, Knowledge_Corr_Percent,
+                                    .fun = mean, na.rm = TRUE),
+    Highlight = if_else(Country_Residence %in% highlight,
+                        as.character(Country_Residence), "Other")
+  )
+
+# NEW: one mean per highlighted country, used for the number labels
+labels_parent <- parent_df |> 
+  filter(Highlight != "Other") |> 
+  group_by(Country_Residence) |> 
+  summarise(m = mean(Knowledge_Corr_Percent, na.rm = TRUE), .groups = "drop")
+
+labels_teacher <- teacher_df |> 
+  filter(Highlight != "Other") |> 
+  group_by(Country_Residence) |> 
+  summarise(m = mean(Knowledge_Corr_Percent, na.rm = TRUE), .groups = "drop")
+
+#Figure 3: Parents, all countries
+p_parent <- parent_df |>                                   
   ggplot(aes(x = Country_Residence, y = Knowledge_Corr_Percent, fill = Highlight)) +
   geom_bar(stat = "summary", fun = "mean", width = 0.8) +
-  stat_summary(
-    data = ~ filter(.x, Highlight != "Other"),
-    geom = "text", fun = "mean",
-    aes(label = sprintf("%1.0f%%", after_stat(y))),
+  geom_text(                                               
+    data = labels_parent,
+    aes(x = Country_Residence, y = m, label = sprintf("%1.0f%%", m)),
+    inherit.aes = FALSE,
     vjust = -0.5, size = 4.5, fontface = "bold"
   ) +
   scale_fill_manual(values = pal, guide = "none") +
   coord_cartesian(ylim = c(0, 80), clip = "off") +
   theme_hc() +
-  labs(title = "Parent ADHD Knowledge", x = NULL, y = "ADHD Knowledge: % Correct") +
+  labs(title = "Parent ADHD\nKnowledge",                  
+       x = NULL, y = "ADHD Knowledge: % Correct") +
   theme(
     plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12),
@@ -342,30 +365,24 @@ p_parent <- Complete_Knowledge_high_n |>
   )
 
 #Figure 4: Teachers, all countries
-p_teacher <- Complete_Knowledge_high_n |> 
-  filter(Role == "teacher") |> 
-  mutate(
-    Country_Residence = fct_reorder(Country_Residence, Knowledge_Corr_Percent,
-                                    .fun = mean, na.rm = TRUE),
-    Highlight = if_else(Country_Residence %in% highlight,
-                        as.character(Country_Residence), "Other")
-  ) |> 
+p_teacher <- teacher_df |>                                 # CHANGED: uses teacher_df
   ggplot(aes(x = Country_Residence, y = Knowledge_Corr_Percent, fill = Highlight)) +
   geom_bar(stat = "summary", fun = "mean", width = 0.8) +
-  stat_summary(
-    data = ~ filter(.x, Highlight != "Other"),
-    geom = "text", fun = "mean",
-    aes(label = sprintf("%1.0f%%", after_stat(y))),
+  geom_text(                                               # CHANGED: replaces stat_summary()
+    data = labels_teacher,
+    aes(x = Country_Residence, y = m, label = sprintf("%1.0f%%", m)),
+    inherit.aes = FALSE,
     vjust = -0.5, size = 4.5, fontface = "bold"
   ) +
   scale_fill_manual(values = pal, guide = "none") +
   coord_cartesian(ylim = c(0, 80), clip = "off") +
   theme_hc() +
-  labs(title = "Teacher ADHD Knowledge", x = NULL, y = NULL) +
+  labs(title = "Teacher ADHD\nKnowledge",                  # CHANGED: two-line title (fixes clipped "e")
+       x = NULL, y = NULL) +
   theme(
     plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12),
-    axis.text.y = element_blank(),    # shared y-axis: only the parent panel shows it
+    axis.text.y = element_blank(),
     axis.ticks.y = element_blank()
   )
 
@@ -433,3 +450,33 @@ p_TT_only
 ```
 `{r} M_TT_parent`% accuracy for parents and `{r} M_TT_teacher`% accuracy for teachers seems low. 
 But.....is it ***abnormally*** low, or do other countries look similar?
+
+To get some context, we measured ADHD knowledge in Canada as well. 
+When we compared both countries, here's what we found:
+```{r}
+p_TT_Can
+```
+
+In a head-to-head comparison with Canada, ADHD knowledge in Trinidad & Tobago really does seem low!
+
+*BUT......*
+
+Maybe Canada's ADHD knowledge is ***abnormally high*** (instead of Trinidad & Tobago's being ***abnormally low***)??
+
+Fair question, especially since Canada's known for how much it's parents and teachers recognize children's ADHD symptoms. 
+
+.......
+
+***WE NEED MORE DATA!!***
+
+So....we partnered with researchers from RMIT University in Australia and added `{r} n_countries - 1` countries to our comparisons. 
+Now we can add more context in our quest to find out: ***Is knowledge about ADHD low in Trinidad & Tobago?***
+Here's what we found:
+```{r}
+#| fig-width: 12
+#| fig-height: 6
+p_par_teach
+
+```
+
+
