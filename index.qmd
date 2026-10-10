@@ -402,12 +402,19 @@ The current study addresses this limitation by comparing ADHD-specific knowledge
 
 # Version A: Scientific Article
 Trinidad & Tobago is located in the Latin America and Caribbean region, where ADHD is thought to be disproportionately undiagnosed and undertreated among children. Unrecognized of mischaracterized symptoms may be a contributor to this phenomenon; parents and teachers in Trinidad & Tobago were found to interpret ADHD-related behaviours as indiscipline and low motivation, more so than Canadians. In our previous study, we also found that factual knowledge about ADHD was markedly lower among participants from Trinidad & Tobago, versus participants from Canada. 
-As seen in Figures 1 and 2, ADHD knowledge (measured by percentage of correct responses on the ADHD Knowledge Questionnaire), was significantly lower among parents (*M* = ; *t*(df) , *p* = ) and teachers (*M* = ; *t*(df) , *p* = ). 
+As seen in Figures 1 and 2, ADHD knowledge (measured by percentage of correct responses on the ADHD Knowledge Questionnaire), was significantly lower among parents (*t*(375) = -10.20 , *p* < .001) and teachers (*t*(375) = -4.55 , *p* < .001). 
 ```{r}
+#| label: fig-tt-knowledge
+#| fig-cap: "ADHD knowledge among parents and teachers in Trinidad & Tobago. *Note.* Bars show mean percentage correct on the ADHD Knowledge Questionnaire. Error bars represent 95% confidence intervals."
+
 fig1
 ```
 
+
 ```{r}
+#| label: fig-tt-canada
+#| fig-cap: "ADHD knowledge among parents and teachers in Trinidad & Tobago and Canada. *Note.* Canadian data are from the original sample only. Error bars represent 95% confidence intervals."
+
 fig2
 ```
 It is appealing to infer that ADHD in Trinidad & Tobago goes undiagnosed beacuse its symptoms go unrecognized, itself a product of low knowldege. while appealing, these causal inferences are tenuous for multiple reasons, one of which relates to "low knowledge". Our results indicate that Trinidad & Tobago's ADHD knowledge was *lower* than Canada's, but this contrast may be misleading. 
@@ -429,8 +436,14 @@ All current analyses were conducted in R, version 4.6.0, using the following pac
 
 # Results
 ```{r}
-fig3
+#| label: fig-parents-teachers
+#| fig-cap: "ADHD knowledge among parents and teachers by country. *Note.* Countries are ordered by mean score within each role. Error bars represent 95% confidence intervals."
+#| fig-width: 12
+#| fig-height: 6
+
+fig5
 ```
+
 As seen in Figure 3, mean ADHD knowledge in Trinidad & Tobago was the lowest among all countries sampled, for both parents (*M* = `{r} M_TT_parent`) and teachers (*M* = `{r} M_TT_teacher`). 
 
 #Conclusion
@@ -478,5 +491,13 @@ Here's what we found:
 p_par_teach
 
 ```
+It was lower than all the additional countries for both parents and teachers. 
+
+While this might seem discouraging, there are two important things to consider:
+
+**1:** These results are *preliminary*
+
+**2:** We can use these insights to develop Trinidad & Tobago-specific ADHD awareness campaigns that focus on the ***exact things*** that parents and teachers aren't aware of!
+
 
 
