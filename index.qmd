@@ -446,7 +446,7 @@ fig5
 
 As seen in Figure 3, mean ADHD knowledge in Trinidad & Tobago was the lowest among all countries sampled, for both parents (*M* = `{r} M_TT_parent`) and teachers (*M* = `{r} M_TT_teacher`). 
 
-#Conclusion
+# Conclusion
 Initial descriptive statistics suggest that factual knowledge about ADHD in Trinidad & Tobago is low in comparison with a broader cross-section of countries. Further inferential tests will be conducted to determine whether preliminary findings are statistically significant.  
 
 # Accessible/Dynamic Outlet Version
