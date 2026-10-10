@@ -1,0 +1,35 @@
+---
+title: "Data Visualization Project"
+author: "Ronald Auguste"
+editor: visual
+date: today
+format: 
+    html:
+      toc: true
+      code-fold: true
+      code-summary: "Show code"
+      df-print: paged
+execute:
+    echo: false
+    warning: false
+---
+
+```{r, load libraries} 
+#|output: FALSE
+
+#loading libraries
+
+library(tidyverse)
+library(psych)
+library(patchwork)
+library(janitor)
+library(ggthemes)
+library(gt)
+```
+
+```{r, import files}
+#|output: FALSE
+
+#load data
+Complete_ADHD_Knowledge <- read_csv("./Complete_ADHD_Knowledge.csv", na = "NA")
+
