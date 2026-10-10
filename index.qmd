@@ -30,6 +30,159 @@ library(gt)
 ```{r, import files}
 #|output: FALSE
 
-#load data
+#Load data
 Complete_ADHD_Knowledge <- read_csv("./Complete_ADHD_Knowledge.csv", na = "NA")
+
+#Quick inspection
+head(Complete_ADHD_Knowledge)
+```
+```{r, clean data}
+#|output: FALSE
+#Removing people who didn't answer anything
+Complete_ADHD_Knowledge <- Complete_ADHD_Knowledge |>   
+  filter(Knowledge_Total > 0)
+
+#Removing countries with n < 20 for each role
+Complete_Knowledge_high_n <- Complete_ADHD_Knowledge |> 
+  group_by(Country_Residence) |> 
+  filter(!(Role %in% "teacher" & sum(Role %in% "teacher") < 20),
+         !(Role %in% "parent"  & sum(Role %in% "parent")  < 20)) |> 
+  ungroup()
+```
+
+```{r, academic visuals}
+#|output: FALSE
+#Figure 1: T&T parents vs teachers
+
+fig1 <- Complete_Knowledge_high_n |> 
+  filter(Country_Residence == "Trinidad & Tobago") |> 
+  ggplot(aes(x = Role, y = Knowledge_Corr_Percent)) +
+  geom_bar(stat = "summary", fun = "mean",
+           fill = "grey75", width = 0.6) +                  
+  stat_summary(geom = "errorbar", fun.data = mean_cl_normal,
+               width = 0.2, linewidth = 0.6) +              
+  scale_x_discrete(labels = c(parent = "Parent", teacher = "Teacher")) +
+  coord_cartesian(ylim = c(0, 80)) +                        
+  theme_hc() +
+  labs(title = "ADHD Knowledge: Trinidad & Tobago",
+       x = NULL, y = "ADHD Knowledge: % Correct") +
+  theme(
+    plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.text.x = element_text(size = 13),                  
+    axis.text.y = element_text(size = 11)
+  )
+
+#Figure 2: T&T with Canada comparisons
+fig2 <- Complete_Knowledge_high_n |> 
+  filter(Country_Residence %in% c("Trinidad & Tobago", "Canada"),
+         Data_source == "Ronald") |>                        #NOTE: Canada's means differ slightly from Figs 3-4 because of this filter
+  mutate(Country_Residence = factor(Country_Residence,      #Done to show my original comparisons, before Canada observations from Tyler's data
+                                    levels = c("Trinidad & Tobago", "Canada"))) |> 
+  ggplot(aes(x = Country_Residence, y = Knowledge_Corr_Percent)) +
+  geom_bar(stat = "summary", fun = "mean",
+           fill = "grey75", width = 0.7) +                  
+  stat_summary(geom = "errorbar", fun.data = mean_cl_normal,
+               width = 0.2, linewidth = 0.6) +              
+  facet_wrap(~Role,
+             labeller = labeller(Role = c(parent = "Parent", teacher = "Teacher"))) +
+  coord_cartesian(ylim = c(0, 80)) +                       
+  theme_hc() +
+  labs(title = "ADHD Knowledge: Trinidad & Tobago and Canada",
+       x = NULL, y = "ADHD Knowledge: % Correct") +
+  theme(
+    plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.text.x = element_text(size = 12),                  
+    axis.text.y = element_text(size = 11),
+    strip.background = element_blank(),
+    strip.text = element_text(size = 14, face = "bold"),
+    panel.spacing = unit(1.5, "lines")   #Better visual than default                   
+  )
+
+#Figure 3: Parents, all countries
+fig3 <- Complete_Knowledge_high_n |> 
+  filter(Role == "parent") |> 
+  mutate(Country_Residence = fct_reorder(Country_Residence, Knowledge_Corr_Percent,
+                                         .fun = mean, na.rm = TRUE)) |> 
+  ggplot(aes(x = Country_Residence, y = Knowledge_Corr_Percent)) +
+  geom_bar(stat = "summary", fun = "mean",
+           fill = "grey75", width = 0.8) +                  
+  stat_summary(geom = "errorbar", fun.data = mean_cl_normal,
+               width = 0.3, linewidth = 0.6) +              
+  coord_cartesian(ylim = c(0, 80)) +                       
+  theme_hc() +
+  labs(title = "Parent ADHD Knowledge",
+       x = NULL, y = "ADHD Knowledge: % Correct") +
+  theme(
+    plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12),  
+    axis.text.y = element_text(size = 11)
+  )
+
+#Figure 4: Teachers, all countries
+fig4 <- Complete_Knowledge_high_n |> 
+  filter(Role == "teacher") |> 
+  mutate(Country_Residence = fct_reorder(Country_Residence, Knowledge_Corr_Percent,
+                                         .fun = mean, na.rm = TRUE)) |> 
+  ggplot(aes(x = Country_Residence, y = Knowledge_Corr_Percent)) +
+  geom_bar(stat = "summary", fun = "mean",
+           fill = "grey75", width = 0.8) +                  # CHANGED: light fill
+  stat_summary(geom = "errorbar", fun.data = mean_cl_normal,
+               width = 0.3, linewidth = 0.6) +              # CHANGED: thinner lines
+  coord_cartesian(ylim = c(0, 80)) +                        # CHANGED: same range as Fig 3
+  theme_hc() +
+  labs(title = "Teacher ADHD Knowledge",
+       x = NULL, y = "ADHD Knowledge: % Correct") +
+  theme(
+    plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 12),  # CHANGED: bigger labels
+    axis.text.y = element_text(size = 11)
+  )
+
+#Figure 5: Parents and teachers, all countries (patchwork)
+#Intermediate figs 3 & 4
+fig3_comb <- fig3 +
+  labs(title = "Parents") +                                 
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.margin = margin(5.5, 5.5, 5.5, 25)                 #Extra left margin so "Trinidad & Tobago" isn't clipped
+  )
+
+fig4_comb <- fig4 +
+  labs(title = "Teachers", y = NULL) +                      #No y title (shared with parent panel)
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    axis.text.y = element_blank(),                          #Hide y-axis; both panels share 0-80
+    axis.ticks.y = element_blank()
+  )
+
+fig5 <- (fig3_comb | fig4_comb) +                           
+  plot_layout(widths = c(14.5, 8)) +    #Setting panel widths to account for different number of countries in parent and teacher figures
+  plot_annotation(
+    title = "ADHD Knowledge by Country",
+    theme = theme(plot.title = element_text(size = 20, face = "bold", hjust = 0.5))
+  )
+
+```
+
+```{r, academic tables and misc objects}
+#|output: FALSE
+
+#Table 1: Country means
+means_tab <- Complete_Knowledge_high_n |> 
+  mutate(Country_Residence = fct_reorder(Country_Residence, Knowledge_Corr_Percent,
+                                         .fun = mean, na.rm = TRUE)) |> 
+  tabyl(Country_Residence, Role) |> 
+  adorn_totals(where = c("col", "row"))     
+
+means_gt <- gt(means_tab)   #use describe() to generate other stats like se to append to final gt table. 
+
+```
+
+```{r, general audience visuals}
+#|output: FALSE
+
+#Colour pallette
+pal <- c("Trinidad & Tobago" = "#CE1126",
+         "Canada"            = "#333333",
+         "Other"             = "#BDBDBD")
 
